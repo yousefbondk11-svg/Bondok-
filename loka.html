@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حكايتنا ❤️</title>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Arial', sans-serif; color: white; 
+            overflow-x: hidden;
+            background: url('https://i.ibb.co/T9Y9ytm/image.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 1000; text-align: center;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); transition: 1s;
+        }
+        #start-btn, .unlock-btn, #surprise-btn {
+            padding: 12px 35px; border-radius: 25px; border: 2px solid #fff;
+            background: rgba(255, 255, 255, 0.1); color: white; cursor: pointer;
+            font-weight: bold; margin-top: 20px; transition: 0.3s;
+        }
+        .profile-img { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ff80ab; margin-bottom: 20px; object-fit: cover; }
+        #login-area input { padding: 12px; border-radius: 20px; border: none; text-align: center; width: 220px; outline: none; margin-top: 10px; color: #000; }
+        #main-content { display: none; text-align: center; min-height: 100vh; }
+        .overlay { background: rgba(0, 0, 0, 0.6); min-height: 100vh; padding: 40px 10px; }
+        .photo-display { width: 280px; height: 380px; margin: 25px auto; border: 6px solid #fff; border-radius: 15px; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .photo-display img { width: 100%; height: 100%; object-fit: cover; position: absolute; left: 0; top: 0; opacity: 0; transition: 1.5s; }
+        .photo-display img.active { opacity: 1; position: relative; }
+        .timer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 340px; margin: 20px auto; }
+        .time-box { background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); }
+        .time-box span { display: block; font-size: 1.8rem; color: #ffeb3b; font-weight: bold; }
+        
+        /* تنسيق الفيديو */
+        .video-container { width: 90%; max-width: 320px; margin: 30px auto; border-radius: 15px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        video { width: 100%; display: block; }
+
+        #hearts-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .heart { position: absolute; color: #ff4d6d; animation: fall linear forwards; font-size: 20px; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
+        #final-message { margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.6); border-radius: 15px; border: 2px dashed #ff80ab; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <div id="pre-lock-msg">
+            <h1>يا أجمل صدفة في عمري.. ❤️</h1>
+            <button onclick="showLogin()" id="start-btn">إيه هي؟ 😍</button>
+        </div>
+        <div id="login-area" style="display: none;">
+            <img src="https://i.ibb.co/hJxg8HzR/image.png" class="profile-img">
+            <h2>أدخلي تاريخنا المميز</h2>
+            <input type="text" id="passInput" placeholder="تاريخ ميلاد القمر"><br>
+            <button onclick="unlock()" class="unlock-btn">فتح الحكاية ✨</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div id="hearts-container"></div>
+        <div class="overlay">
+            <h1>حكايتنا بدأت وما انتهتش ✨</h1>
+            
+            <div class="photo-display">
+                <img src="https://i.ibb.co/W9yZ9zh/image.png" class="active" id="slide">
+            </div>
+
+            <div class="timer-grid">
+                <div class="time-box"><span id="days">0</span><p>يوم</p></div>
+                <div class="time-box"><span id="hours">0</span><p>ساعة</p></div>
+                <div class="time-box"><span id="mins">0</span><p>دقيقة</p></div>
+                <div class="time-box"><span id="secs">0</span><p>ثانية</p></div>
+            </div>
+
+            <div class="video-container">
+                <video id="myVideo" controls>
+                    <source src="lovevid.MOV" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <button onclick="showFinalSurprise()" id="surprise-btn">رسالة ليكي.. ❤️</button>
+            <div id="final-message">
+                <p>"أنتِ الدنيا وما فيها، ومستعد أعمل أي حاجة عشان تفضلي جانبي.. بحبك لآخر العمر!"</p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="loveSong" loop>
+        <source src="lovesong.m4a" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // التاريخ المعدل: 9 فبراير 2026
+        const startDate = new Date("2026-02-09T00:00:00").getTime();
+        
+        const images = [
+            "https://i.ibb.co/jPGqBj6x/image.png",
+            "https://i.ibb.co/YTfYS8KB/image.png",
+            "https://i.ibb.co/ZRPbH00z/image.png",
+            "https://i.ibb.co/0VGKD1wN/image.png"
+        ];
+        let currentIdx = 0;
+
+        function showLogin() {
+            document.getElementById('pre-lock-msg').style.display = 'none';
+            document.getElementById('login-area').style.display = 'block';
+        }
+
+        function unlock() {
+            if(document.getElementById('passInput').value === "24/11/2006") {
+                document.getElementById('lock-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lock-screen').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    
+                    // تشغيل الأغنية والفيديو تلقائياً
+                    document.getElementById('loveSong').play();
+                    document.getElementById('myVideo').play();
+                    
+                    startSystem();
+                }, 800);
+            } else { alert("التاريخ غلط يا قلبي! ❤️"); }
+        }
+
+        function startSystem() {
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = now - startDate;
+                document.getElementById('days').innerText = Math.floor(diff / 86400000);
+                document.getElementById('hours').innerText = Math.floor((diff / 3600000) % 24);
+                document.getElementById('mins').innerText = Math.floor((diff / 60000) % 60);
+                document.getElementById('secs').innerText = Math.floor((diff / 1000) % 60);
+            }, 1000);
+
+            const imgElement = document.getElementById('slide');
+            setInterval(() => {
+                currentIdx = (currentIdx + 1) % images.length;
+                imgElement.style.opacity = 0;
+                setTimeout(() => { imgElement.src = images[currentIdx]; imgElement.style.opacity = 1; }, 800);
+            }, 4000);
+
+            setInterval(createHeart, 400);
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️'; heart.className = 'heart';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 2 + 's';
+            document.getElementById('hearts-container').appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+
+        function showFinalSurprise() {
+            document.getElementById('surprise-btn').style.display = 'none';
+            document.getElementById('final-message').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
